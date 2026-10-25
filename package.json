@@ -1,0 +1,14 @@
+{
+  "name": "anglerlog-portal",
+  "version": "1.0.0",
+  "description": "Portal and landing page for AnglerLog (https://angler-log.app/)",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.151.1"
+  },
+  "type": "module"
+}

@@ -1,0 +1,15 @@
+node_modules/
+.wrangler/
+.env*
+dist/
+AnglerLog_*/
+*.bak*
+check_*.js
+test_*.js
+deploy_*.js
+deploy_*.mjs
+verify_*.js
+*.txt
+*.ps1
+*.mjs
+scratch/

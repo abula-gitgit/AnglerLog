@@ -1,0 +1,9 @@
+name = "anglerlog-portal"
+main = "src/index.js"
+compatibility_date = "2026-10-17"
+
+# Custom domain configuration for Cloudflare Workers
+# Routes can also be attached via wrangler or Cloudflare Dashboard / API
+routes = [
+  { pattern = "angler-log.app/*", zone_name = "angler-log.app" }
+]
