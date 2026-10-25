@@ -1960,7 +1960,14 @@ function htmlLayout({ title, desc, ogTitle, ogDesc, ogUrl, lang = "ja", isPrivac
   <link rel="alternate" hreflang="es" href="https://angler-log.app/es" />
   <link rel="alternate" hreflang="it" href="https://angler-log.app/it" />
   <link rel="alternate" hreflang="pt" href="https://angler-log.app/pt" />
-  <link rel="alternate" hreflang="x-default" href="https://angler-log.app/" />` : ""}
+  <link rel="alternate" hreflang="x-default" href="https://angler-log.app/" />` : `<link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+  <link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+  <link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+  <link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+  <link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+  <link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+  <link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+  <link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />`}
   ${jsonLd}
   <meta name="theme-color" content="#070c18" />
   <link rel="icon" type="image/png" href="data:image/png;base64,${ICON_PNG_B64}" />
@@ -2086,8 +2093,29 @@ function htmlLayout({ title, desc, ogTitle, ogDesc, ogUrl, lang = "ja", isPrivac
       </a>
 
       ${isPrivacy ? `
-      <div class="flex items-center gap-3">
-        <a href="${PORTAL_PATHS[currentLang] || '/'}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold text-brand-400 hover:text-brand-300 border border-slate-800 transition-all">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="relative inline-flex items-center">
+          <div class="absolute left-2.5 sm:left-3 pointer-events-none text-slate-400">
+            ${SVGS.globe}
+          </div>
+          <select
+            aria-label="Privacy Policy Language"
+            onchange="window.location.href=this.value"
+            class="appearance-none bg-slate-900/90 hover:bg-slate-800 text-slate-200 text-xs sm:text-sm font-semibold pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 rounded-xl border border-slate-700/80 hover:border-brand-500/50 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500/50 transition-all cursor-pointer shadow-sm"
+          >
+            <option value="/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'ja' ? 'selected' : ''}>日本語 (JA)</option>
+            <option value="/en/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'en' ? 'selected' : ''}>English (EN)</option>
+            <option value="/fr/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'fr' ? 'selected' : ''}>Français (FR)</option>
+            <option value="/de/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'de' ? 'selected' : ''}>Deutsch (DE)</option>
+            <option value="/es/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'es' ? 'selected' : ''}>Español (ES)</option>
+            <option value="/it/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'it' ? 'selected' : ''}>Italiano (IT)</option>
+            <option value="/pt/privacy" class="bg-slate-900 text-slate-200" ${currentLang === 'pt' ? 'selected' : ''}>Português (PT)</option>
+          </select>
+          <div class="absolute right-2 sm:right-2.5 pointer-events-none text-slate-400">
+            ${SVGS.chevronDown}
+          </div>
+        </div>
+        <a href="${PORTAL_PATHS[currentLang] || '/'}" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs sm:text-sm font-semibold text-brand-400 hover:text-brand-300 border border-slate-800 transition-all shadow-sm">
           <span>&larr; ${t.nav.home}</span>
         </a>
       </div>` : `
@@ -2159,7 +2187,7 @@ function htmlLayout({ title, desc, ogTitle, ogDesc, ogUrl, lang = "ja", isPrivac
           <a href="/it" class="hover:text-brand-300 transition-colors">Italiano</a>
           <a href="/pt" class="hover:text-brand-300 transition-colors">Português</a>
           <span class="text-slate-700 hidden sm:inline">|</span>
-          <a href="/privacy" class="hover:text-brand-300 transition-colors">${t.nav.privacy}</a>
+          <a href="${currentLang === 'ja' ? '/privacy' : `/${currentLang}/privacy`}" class="hover:text-brand-300 transition-colors">${t.nav.privacy}</a>
         </div>
       </div>
 
@@ -2870,7 +2898,7 @@ function renderLandingContent(lang = "ja") {
             <span>${t.cta.launchBtn}</span>
             <span class="group-hover:translate-x-1 transition-transform">${SVGS.arrowRight}</span>
           </a>
-          <a href="/privacy" class="text-xs font-semibold text-slate-400 hover:text-brand-300 underline">
+          <a href="${lang === 'ja' ? '/privacy' : `/${lang}/privacy`}" class="text-xs font-semibold text-slate-400 hover:text-brand-300 underline">
             ${t.cta.privacyLink}
           </a>
         </div>
@@ -2880,176 +2908,483 @@ function renderLandingContent(lang = "ja") {
   </main>`;
 }
 
-const PRIVACY_MAIN = `
-  <main class="flex-grow py-16 px-4 sm:px-6 lg:px-8">
+
+const PRIVACY_TRANSLATIONS = {
+  "ja": {
+    "metaTitle": "プライバシーポリシー・免責事項 - AnglerLog",
+    "metaDesc": "AnglerLog（自分専用の釣り場・釣果ノート）のプライバシーポリシーおよび釣行に関する免責事項。完全ローカル保存・外部送信ゼロ。",
+    "title": "プライバシーポリシー・免責事項",
+    "sub": "Privacy Policy & Safe Angling Disclaimer",
+    "sections": [
+      {
+        "num": "1",
+        "title": "基本方針（ローカルファースト設計）",
+        "paragraphs": [
+          "AnglerLog（以下「当サービス」）は、アングラーにとってかけがえのない秘密の釣行ポイントや個人記録の機密保護を最重要方針として設計されています。",
+          "当サービスに入力される一切の情報（釣り場名、GPS座標、潮位・気象メモ、釣果魚種、サイズ、仕掛け・ルアー情報、写真データ等）は、すべて利用者が使用している端末のブラウザ内（IndexedDB / localStorage）にのみ保存されます。ユーザーの明示的なエクスポート操作なしに、外部サーバーへの自動送信・収集・第三者提供が行われることは一切ありません。"
+        ]
+      },
+      {
+        "num": "2",
+        "title": "位置情報（GPS）の利用",
+        "paragraphs": [
+          "当サービスでは、現在地の地図表示、ポイントの新規登録、およびその地点の潮汐（タイド）・気象データを取得するために、端末の位置情報サービス（GPS）へのアクセスを求める場合があります。",
+          "位置情報は端末内での演算および気象・タイドAPIへの座標リクエストのみに利用され、利用者の移動履歴や行動ログをサーバー上に追跡・プロファイリングすることはありません。"
+        ]
+      },
+      {
+        "num": "3",
+        "title": "写真・画像データの取り扱い",
+        "paragraphs": [
+          "釣果写真やポイントメモのために保存された画像は、お使いの端末ローカルストレージにのみ保存されます。外部のクラウドや画像サーバーへ自動アップロードされることはありません。"
+        ]
+      },
+      {
+        "num": "4",
+        "title": "アクセス解析・Cookieについて",
+        "paragraphs": [
+          "当ポータルおよび各エディションでは、インフラの安定運用・可用性向上・障害検知のため、Cloudflare Web Analytics 等の匿名解析ツールを利用する場合があります。これらは個人を特定するCookieを使用せず、プライバシーに配慮された集計データのみを取り扱います。"
+        ]
+      },
+      {
+        "num": "5",
+        "title": "免責事項（釣行時の安全確保について）",
+        "paragraphs": [
+          "当サービスで表示されるタイドグラフ（潮汐予測）、潮名、気象情報、日の出・日の入り時刻等は参考用データです。気象および海況条件は急激に変化する可能性があり、実際の天候や海象と異なる場合があります。",
+          "釣行の際は必ず気象庁・海上保安庁・自治体等の最新の気象警報・注意報を確認し、ライフジャケットの常時着用、立入禁止・危険箇所の回避、天候悪化時の速やかな退避など、自身の安全確保を最優先として行動してください。",
+          "当サービスの利用または利用不能により生じた一切の損害、事故、トラブルについて、開発者および運営者はその責任を負いかねますのであらかじめご了承ください。"
+        ]
+      },
+      {
+        "num": "6",
+        "title": "お問い合わせ窓口",
+        "paragraphs": [
+          "本サービスに関するご質問、フィードバック、お問い合わせは以下までお願いいたします。"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "制定日: 2026年10月17日",
+      "revised": "改定日: 2026年10月25日 (多言語個別ページ対応)"
+    }
+  },
+  "en": {
+    "metaTitle": "Privacy Policy & Maritime Disclaimer - AnglerLog",
+    "metaDesc": "Privacy policy and maritime safety disclaimer for AnglerLog. 100% local device storage, zero cloud leaks, and complete fishing spot privacy.",
+    "title": "Privacy Policy & Maritime Safety Disclaimer",
+    "sub": "Privacy Policy & Safe Angling Disclaimer",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Core Policy: 100% Local-First Architecture",
+        "paragraphs": [
+          "AnglerLog (\"the Service\") is architected around one uncompromising commitment: safeguarding the absolute confidentiality of your secret fishing spots, catch records, and personal angling data.",
+          "All data entered into the Service—including waypoint coordinates, spot nicknames, tide and weather observations, target species, length, weight, tackle setups, and uploaded trophy photos—is stored strictly within your device browser's local memory (IndexedDB / localStorage). Nothing is transmitted, collected, synced, or shared with external servers without your explicit manual export."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Use of GPS Location Services",
+        "paragraphs": [
+          "The Service may request access to your device's GPS geolocation services solely to render your current position on the map, pin new fishing spots, and query tide/marine weather predictions for your current coordinates.",
+          "Geolocation data is processed locally on your device and never tracked, recorded, logged, or profiled on any remote server."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Photos & Media Storage",
+        "paragraphs": [
+          "Photos captured or imported for catch logs and spot references are compressed and stored solely inside your local browser database. Your imagery and its associated metadata (such as EXIF geolocation) are never uploaded to any cloud storage or image repository."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Analytics, Cookies & Telemetry",
+        "paragraphs": [
+          "To maintain portal infrastructure reliability, prevent abuse, and optimize availability, the Service may utilize privacy-preserving, cookieless analytics solutions such as Cloudflare Web Analytics. No cross-site tracking cookies or personal fingerprinting techniques are ever employed."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Maritime Safety & Fieldwork Disclaimer",
+        "paragraphs": [
+          "Tide curves, astronomical moon phases, weather metrics, and sunrise/sunset times displayed in the Service are calculated estimates intended purely for recreational planning. Natural conditions, bathymetry, currents, and sudden squalls can cause actual conditions to diverge significantly from calculated models.",
+          "Always verify local maritime forecasts, marine police warnings, and national weather service advisories prior to heading out. Maintain maritime safety as your primary priority: wear an approved life vest / personal flotation device (PFD) at all times, avoid restricted or unstable coastal terrain, and withdraw promptly if weather or surf deteriorates.",
+          "The developer and operator disclaim all liability for any accidents, injuries, losses, or damages resulting from the use or inability to use the Service."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Contact & Inquiries",
+        "paragraphs": [
+          "For questions, feedback, or support regarding AnglerLog, please contact:"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Established: October 17, 2026",
+      "revised": "Revised: October 25, 2026 (Dedicated Multilingual Editions)"
+    }
+  },
+  "fr": {
+    "metaTitle": "Politique de Confidentialité & Avertissement - AnglerLog",
+    "metaDesc": "Politique de confidentialité et avertissement maritime d'AnglerLog. Architecture 100% locale, zéro fuite sur le cloud, confidentialité totale de vos spots.",
+    "title": "Politique de Confidentialité & Avertissement de Sécurité",
+    "sub": "Politique de Confidentialité & Avertissement Maritime",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Principe Fondamental : Architecture 100% Locale",
+        "paragraphs": [
+          "AnglerLog (« le Service ») est conçu avec une exigence absolue : garantir la confidentialité totale de vos spots de pêche secrets, de vos prises et de vos notes de terrain.",
+          "Toutes les données saisies dans le Service (coordonnées GPS, noms de spots, relevés de marée et météo, espèces capturées, tailles, poids, montages et photographies) sont stockées exclusivement dans la mémoire locale de votre navigateur (IndexedDB / localStorage). Aucune donnée n'est transmise, collectée ou partagée avec des serveurs externes sans votre démarche explicite d'exportation."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Utilisation des Données de Localisation GPS",
+        "paragraphs": [
+          "Le Service peut solliciter l'accès au capteur GPS de votre appareil uniquement pour situer votre position sur la carte, enregistrer de nouveaux repères et interroger les prévisions de marées et de météo marine correspondant à ces coordonnées.",
+          "Ces coordonnées sont traitées localement et ne font l'objet d'aucun suivi, archivage ou profilage sur des serveurs distants."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Traitement des Photos et Médias",
+        "paragraphs": [
+          "Les photos enregistrées pour illustrer vos prises et repères sont conservées uniquement au sein du stockage interne de votre navigateur. Vos clichés et leurs métadonnées EXIF ne sont jamais transférés vers un hébergement cloud externe."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Analyses d'Audience et Cookies",
+        "paragraphs": [
+          "Pour assurer la stabilité, la sécurité et la haute disponibilité de l'infrastructure, le Service peut faire appel à des outils d'analyse anonymes et sans cookies, tels que Cloudflare Web Analytics. Aucun traceur publicitaire intrusif n'est utilisé."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Avertissement de Sécurité Maritime et Responsabilité",
+        "paragraphs": [
+          "Les courbes de marées, coefficients, prévisions météo et heures solaires fournis par le Service sont des estimations calculées à titre informatif et récréatif. La météo et l'état de la mer peuvent évoluer rapidement et différer des modèles théoriques.",
+          "Consultez systématiquement les bulletins officiels des services météorologiques et des autorités maritimes avant chaque sortie. Faites toujours passer votre sécurité en premier : portez un gilet de sauvetage homologué en permanence, évitez les zones côtières dangereuses ou interdites, et quittez les lieux dès les premiers signes de dégradation météorologique.",
+          "Le développeur et l'exploitant déclinent toute responsabilité en cas d'accident, de blessure, de dommage matériel ou d'incident survenu lors de l'utilisation de l'application."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Contact et Assistance",
+        "paragraphs": [
+          "Pour toute question, suggestion ou demande relative à AnglerLog, vous pouvez nous écrire à l'adresse suivante :"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Date d'établissement : 17 octobre 2026",
+      "revised": "Dernière révision : 25 octobre 2026 (Éditions multilingues dédiées)"
+    }
+  },
+  "de": {
+    "metaTitle": "Datenschutzerklärung & Seefahrts-Hinweise - AnglerLog",
+    "metaDesc": "Datenschutzerklärung und Sicherheitshinweise für AnglerLog. 100% lokale Speicherung, null Cloud-Uploads und absoluter Schutz Ihrer geheimen Angelplätze.",
+    "title": "Datenschutzerklärung & Seefahrts-Haftungsausschluss",
+    "sub": "Datenschutzerklärung & Sicherheitshinweise am Wasser",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Grundprinzip: 100% Lokale Offline-Architektur",
+        "paragraphs": [
+          "AnglerLog („der Dienst“) basiert auf einem zentralen Leitgedanken: dem kompromisslosen Schutz Ihrer geheimen Angelplätze, Fangstatistiken und persönlichen Notizen.",
+          "Alle in den Dienst eingegebenen Daten (GPS-Koordinaten, Gewässernamen, Gezeiten- und Wetterdaten, Fischarten, Maße, Gewichte, Köder und Fotos) werden ausschließlich im lokalen Speicher Ihres Browsers (IndexedDB / localStorage) gesichert. Es erfolgt keinerlei automatischer Transfer, keine Speicherung auf externen Cloud-Servern und keine Weitergabe an Dritte ohne Ihren ausdrücklichen Export."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Nutzung von GPS-Standortdaten",
+        "paragraphs": [
+          "Der Dienst fordert den Zugriff auf den GPS-Empfänger Ihres Endgeräts ausschließlich an, um Ihren aktuellen Standort auf der Karte darzustellen, neue Fangplätze zu markieren und standortgenaue Gezeiten- sowie Wettervorhersagen abzurufen.",
+          "Die Positionsdaten werden ausschließlich lokal auf Ihrem Endgerät verarbeitet und zu keinem Zeitpunkt auf Servern getrackt, protokolliert oder für Nutzerprofile ausgewertet."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Speicherung von Fotos und Medien",
+        "paragraphs": [
+          "Fotos, die Sie zu Fangberichten oder Spots speichern, verbleiben ausschließlich im lokalen Browser-Speicher Ihres Geräts. Bilder und deren EXIF-Metadaten werden niemals auf externe Bildserver oder Cloud-Dienste übertragen."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Web-Analyse, Cookies & Telemetrie",
+        "paragraphs": [
+          "Zur Sicherstellung von Systemstabilität, Ausfallsicherheit und Performance nutzt der Dienst datenschutzfreundliche, cookie-freie Analysedienste wie Cloudflare Web Analytics. Es werden keine verhaltensbasierten Tracking-Cookies eingesetzt."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Sicherheit am Wasser & Haftungsausschluss",
+        "paragraphs": [
+          "Gezeitengrafiken, Mondphasen, Wetterprognosen sowie Sonnenauf- und -untergangszeiten sind rechnerische Orientierungshilfen für den Freizeiteinsatz. Die tatsächlichen Bedingungen vor Ort können durch Strömungen, Untiefen oder plötzliche Wetterumschwünge erheblich abweichen.",
+          "Informieren Sie sich vor jedem Angeltrip über amtliche Seewetterberichte und behördliche Warnungen. Eigensicherung hat stets oberste Priorität: Tragen Sie durchgehend eine geprüfte Rettungsweste, meiden Sie gesperrte Uferzonen und brechen Sie das Angeln bei widrigen Verhältnissen frühzeitig ab.",
+          "Entwickler und Betreiber übernehmen keinerlei Haftung für Unfälle, Personen- oder Sachschäden, die aus der Nutzung des Dienstes entstehen."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Kontakt und Anfragen",
+        "paragraphs": [
+          "Bei Fragen, Anregungen oder Support-Anliegen zu AnglerLog erreichen Sie uns unter:"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Datum des Inkrafttretens: 17. Oktober 2026",
+      "revised": "Letzte Aktualisierung: 25. Oktober 2026 (Mehrsprachige Einzelseiten)"
+    }
+  },
+  "es": {
+    "metaTitle": "Política de Privacidad & Descargo de Seguridad - AnglerLog",
+    "metaDesc": "Política de privacidad y advertencia de seguridad para AnglerLog. Almacenamiento 100% local, cero envíos a la nube y privacidad total de tus pesqueros.",
+    "title": "Política de Privacidad & Descargo de Responsabilidad Marítima",
+    "sub": "Política de Privacidad & Normas de Seguridad en Pesca",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Principio Fundamental: Arquitectura 100% Local",
+        "paragraphs": [
+          "AnglerLog (\"el Servicio\") está diseñado bajo una premisa inquebrantable: preservar la confidencialidad absoluta de tus marcas secretas, capturas y notas personales de pesca.",
+          "Toda la información introducida en el Servicio (coordenadas GPS, nombres de zonas, lecturas de mareas y clima, especies, medidas, pesos, aparejos y fotografías) se almacena únicamente en el almacenamiento local de tu navegador (IndexedDB / localStorage). Nada se envía a servidores externos ni se comparte con terceros sin tu exportación voluntaria."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Uso de Servicios de Ubicación GPS",
+        "paragraphs": [
+          "El Servicio puede requerir acceso a los servicios de geolocalización GPS de tu dispositivo únicamente para mostrar tu posición en el mapa, registrar nuevos pesqueros y consultar previsiones de mareas y oleaje para ese punto.",
+          "Las coordenadas se calculan localmente y nunca se rastrean, archivan ni perfilan en servidores remotos."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Almacenamiento de Fotos e Imágenes",
+        "paragraphs": [
+          "Las fotografías agregadas a tus capturas o marcas quedan guardadas exclusivamente en la memoria de tu dispositivo. Tus fotos y metadatos EXIF jamás se suben a repositorios cloud externos."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Análisis Web y Cookies",
+        "paragraphs": [
+          "Para monitorizar la disponibilidad del portal y prevenir fallos técnicos, el Servicio puede emplear herramientas de métricas anónimas sin cookies, tales como Cloudflare Web Analytics. No se utilizan cookies invasivas de seguimiento publicitario."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Seguridad en el Mar y Descargo de Responsabilidad",
+        "paragraphs": [
+          "Las tablas de mareas, fases lunares y previsiones meteorológicas mostradas son cálculos orientativos para la planificación deportiva. Las corrientes, bajíos y temporales repentinos pueden provocar variaciones notables frente a los modelos predictivos.",
+          "Comprueba siempre los partes meteorológicos oficiales de salvamento marítimo y autoridades portuarias. Tu seguridad es prioritaria: lleva chaleco salvavidas homologado en todo momento, respeta zonas prohibidas o acantilados peligrosos, y evacúa con rapidez ante cualquier empeoramiento del tiempo.",
+          "El desarrollador y el operador no se responsabilizan de accidentes, percances personales o pérdidas materiales derivados del uso del Servicio."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Contacto y Consultas",
+        "paragraphs": [
+          "Si deseas realizar consultas, comentarios o sugerencias sobre AnglerLog, puedes contactarnos en:"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Fecha de establecimiento: 17 de octubre de 2026",
+      "revised": "Última revisión: 25 de octubre de 2026 (Páginas multilingües dedicadas)"
+    }
+  },
+  "it": {
+    "metaTitle": "Informativa sulla Privacy & Disclaimer - AnglerLog",
+    "metaDesc": "Informativa sulla privacy e avviso di sicurezza marittima per AnglerLog. Architettura 100% locale, zero fughe su cloud, riservatezza totale dei tuoi spot.",
+    "title": "Informativa sulla Privacy & Disclaimer di Sicurezza Marittima",
+    "sub": "Informativa sulla Privacy & Linee Guida di Sicurezza in Mare",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Principio Fondamentale: Architettura 100% Locale",
+        "paragraphs": [
+          "AnglerLog (\"il Servizio\") è strutturato secondo un principio irrinunciabile: proteggere la segretezza assoluta dei tuoi spot di pesca, delle tue catture e delle annotazioni personali.",
+          "Qualsiasi informazione inserita nel Servizio (coordinate GPS, toponimi, osservazioni su maree e meteo, specie ittiche, misure, pesi, esche e foto) viene salvata esclusivamente nella memoria locale del tuo browser (IndexedDB / localStorage). Nessun dato viene trasmesso, archiviato su server remoti o condiviso con terze parti senza una tua esplicita azione di esportazione."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Uso dei Servizi di Posizione GPS",
+        "paragraphs": [
+          "Il Servizio può richiedere l'accesso ai sensori di geolocalizzazione GPS del dispositivo unicamente per visualizzare la posizione sulla mappa, appuntare nuovi waypoint e caricare le previsioni meteomarine per quelle coordinate.",
+          "Le informazioni di localizzazione sono elaborate localmente e non vengono mai tracciate o profilate su server esterni."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Trattamento di Foto e Immagini",
+        "paragraphs": [
+          "Le foto salvate nel diario di cattura rimangono confinate nel database locale del tuo browser. Le immagini e i relativi metadati EXIF non vengono mai caricati su server cloud esterni."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Analisi Web e Cookie",
+        "paragraphs": [
+          "Per garantire stabilità operativa ed efficienza dell'infrastruttura, il Servizio può avvalersi di soluzioni analitiche anonime senza cookie come Cloudflare Web Analytics. Non viene fatto uso di cookie traccianti per finalità pubblicitarie."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Sicurezza in Mare e Limitazione di Responsabilità",
+        "paragraphs": [
+          "I grafici di marea, le fasi lunari e i parametri meteo proposti dall'applicazione sono stime a scopo informativo e ricreativo. Il mare e le perturbazioni atmosferiche possono mutare repentinamente, rendendo le condizioni reali dissimili da quelle previste.",
+          "Verifica con costanza i bollettini ufficiali della guardia costiera e degli enti meteo accreditati. Dai assoluta priorità alla tua sicurezza: indossa sempre un giubbotto di salvataggio omologato, evita scogliere scivolose o zone interdette, e allontanati tempestivamente all'avvicinarsi del maltempo.",
+          "Gli sviluppatori e i gestori declinano ogni responsabilità per incidenti, infortuni o danni a persone o cose legati all'impiego dell'applicazione."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Contatti e Assistenza",
+        "paragraphs": [
+          "Per quesiti, segnalazioni o assistenza su AnglerLog, è possibile contattare:"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Data di emissione: 17 ottobre 2026",
+      "revised": "Ultima revisione: 25 ottobre 2026 (Pagine dedicate multilingua)"
+    }
+  },
+  "pt": {
+    "metaTitle": "Política de Privacidade & Isenção Marítima - AnglerLog",
+    "metaDesc": "Política de privacidade e aviso de segurança marítima do AnglerLog. Armazenamento 100% local, zero fugas na cloud e total privacidade dos seus pesqueiros.",
+    "title": "Política de Privacidade & Aviso de Segurança Marítima",
+    "sub": "Política de Privacidade & Salvaguarda Náutica",
+    "sections": [
+      {
+        "num": "1",
+        "title": "Princípio Fundamental: Arquitetura 100% Local",
+        "paragraphs": [
+          "O AnglerLog (\"o Serviço\") foi concebido sob um compromisso inegociável: proteger o sigilo absoluto dos seus pesqueiros secretos, registos de capturas e notas pessoais de pesca.",
+          "Todas as informações introduzidas no Serviço (coordenadas GPS, nomes de pesqueiros, registos de marés e meteorologia, espécies, tamanhos, pesos, montagens e fotos) são guardadas exclusivamente na memória local do seu navegador (IndexedDB / localStorage). Nada é transmitido, arquivado em servidores remotos ou partilhado com terceiros sem que execute uma exportação manual."
+        ]
+      },
+      {
+        "num": "2",
+        "title": "Utilização de Serviços de Localização GPS",
+        "paragraphs": [
+          "O Serviço pode solicitar acesso à geolocalização por GPS do seu dispositivo exclusivamente para assinalar a sua posição na carta, marcar novos pontos de pesca e consultar as previsões marítimas para essa localização.",
+          "Os dados geográficos são processados localmente e nunca são rastreados, armazenados ou analisados para definição de perfis em servidores externos."
+        ]
+      },
+      {
+        "num": "3",
+        "title": "Armazenamento de Fotografias e Ficheiros",
+        "paragraphs": [
+          "As fotos adicionadas aos seus registos de pesca permanecem unicamente na base de dados interna do seu navegador. As suas fotografias e respetivos metadados EXIF nunca são enviados para plataformas na cloud."
+        ]
+      },
+      {
+        "num": "4",
+        "title": "Análise de Tráfego e Cookies",
+        "paragraphs": [
+          "De forma a assegurar a fiabilidade, estabilidade e capacidade de resposta da infraestrutura, o Serviço poderá recorrer a ferramentas estatísticas anónimas sem cookies, tais como o Cloudflare Web Analytics. Não são utilizados cookies de monitorização publicitária."
+        ]
+      },
+      {
+        "num": "5",
+        "title": "Segurança no Mar e Isenção de Responsabilidade",
+        "paragraphs": [
+          "Os gráficos de marés, efemérides lunares e previsões meteorológicas apresentados são cálculos meramente indicativos para fins de lazer. O estado do mar, as correntes e as frentes meteorológicas podem sofrer alterações súbitas, divergindo dos modelos teóricos.",
+          "Consulte sempre os avisos à navegação e alertas meteorológicos emitidos pela autoridade marítima e pelos serviços oficiais. A sua integridade física deve prevalecer sempre: use colete salva-vidas permanentemente, evite arribas instáveis ou locais de acesso interdito, e retire-se prontamente caso as condições marítimas se deteriorem.",
+          "O programador e os responsáveis pela plataforma declinam qualquer responsabilidade por acidentes, danos físicos ou materiais decorrentes do uso da aplicação."
+        ]
+      },
+      {
+        "num": "6",
+        "title": "Contacto e Apoio",
+        "paragraphs": [
+          "Para esclarecimento de dúvidas, comentários ou sugestões sobre o AnglerLog, contacte-nos através de:"
+        ]
+      }
+    ],
+    "dates": {
+      "created": "Data de instituição: 17 de outubro de 2026",
+      "revised": "Última atualização: 25 de outubro de 2026 (Páginas multilingues dedicadas)"
+    }
+  }
+};
+
+function renderPrivacyContent(lang) {
+  const p = PRIVACY_TRANSLATIONS[lang] || PRIVACY_TRANSLATIONS.ja;
+  const langPills = [
+    { code: 'ja', label: '日本語', path: '/privacy' },
+    { code: 'en', label: 'English', path: '/en/privacy' },
+    { code: 'fr', label: 'Français', path: '/fr/privacy' },
+    { code: 'de', label: 'Deutsch', path: '/de/privacy' },
+    { code: 'es', label: 'Español', path: '/es/privacy' },
+    { code: 'it', label: 'Italiano', path: '/it/privacy' },
+    { code: 'pt', label: 'Português', path: '/pt/privacy' }
+  ];
+
+  const pillsHtml = langPills.map(lp => {
+    const isCur = lp.code === lang;
+    return `<a href="${lp.path}" class="px-3 py-1 rounded-xl text-xs font-semibold transition-all ${isCur ? 'bg-brand-500/20 text-brand-300 border border-brand-500/40 shadow-sm' : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-slate-800' }">${lp.label}</a>`;
+  }).join(' ');
+
+  const sectionsHtml = p.sections.map(s => {
+    const paras = s.paragraphs.map(text => `<p class="mb-3 last:mb-0">${text}</p>`).join('');
+    return `
+    <section>
+      <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
+        <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
+        ${s.num}. ${s.title}
+      </h2>
+      <div class="leading-relaxed">
+        ${paras}
+      </div>
+      ${s.num === '6' ? '<p class="mt-2 font-mono text-brand-300 font-semibold">Email: stoooone.studio@gmail.com</p>' : ''}
+    </section>`;
+  }).join('');
+
+  return `
+  <main class="flex-grow py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
-      <div class="p-8 sm:p-14 rounded-3xl glass-card border border-brand-500/30 shadow-2xl">
+      
+      <!-- Multilingual Pill Navigator -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-8 p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md">
+        ${pillsHtml}
+      </div>
+
+      <div class="p-6 sm:p-14 rounded-3xl glass-card border border-brand-500/30 shadow-2xl">
         
         <div class="flex items-center gap-4 mb-10 pb-6 border-b border-slate-800">
-          <div class="w-14 h-14 rounded-2xl bg-brand-950 border border-brand-500/40 text-brand-400 flex items-center justify-center shrink-0 shadow-lg shadow-brand-950/60">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-950 border border-brand-500/40 text-brand-400 flex items-center justify-center shrink-0 shadow-lg shadow-brand-950/60">
             ${SVGS.shield}
           </div>
           <div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">プライバシーポリシー・免責事項</h1>
-            <p class="text-xs text-brand-400 font-mono mt-1">Privacy Policy & Safe Angling Disclaimer</p>
+            <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">${p.title}</h1>
+            <p class="text-xs text-brand-400 font-mono mt-1">${p.sub}</p>
           </div>
         </div>
 
         <div class="space-y-10 text-sm sm:text-base text-slate-300 leading-relaxed">
-          
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              1. 基本方針（ローカルファースト設計）
-            </h2>
-            <p class="mb-3">
-              AnglerLog（以下「当サービス」）は、アングラーにとってかけがえのない秘密の釣行ポイントや個人記録の機密保護を最重要方針として設計されています。
-            </p>
-            <p>
-              当サービスに入力される一切の情報（釣り場名、GPS座標、潮位・気象メモ、釣果魚種、サイズ、仕掛け・ルアー情報、写真データ等）は、すべて利用者が使用している端末のブラウザ内（IndexedDB / localStorage）にのみ保存されます。ユーザーの明示的なエクスポート操作なしに、外部サーバーへの自動送信・収集・第三者提供が行われることは一切ありません。
-            </p>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              2. 位置情報（GPS）の利用
-            </h2>
-            <p class="mb-3">
-              当サービスでは、現在地の地図表示、ポイントの新規登録、およびその地点の潮汐（タイド）・気象データを取得するために、端末の位置情報サービス（GPS）へのアクセスを求める場合があります。
-            </p>
-            <p>
-              位置情報は端末内での演算および気象・タイドAPIへの座標リクエストのみに利用され、利用者の移動履歴や行動ログをサーバー上に追跡・プロファイリングすることはありません。
-            </p>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              3. 写真・画像データの取り扱い
-            </h2>
-            <p>
-              釣果写真やポイントメモのために保存された画像は、お使いの端末ローカルストレージにのみ保存されます。外部のクラウドや画像サーバーへ自動アップロードされることはありません。
-            </p>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              4. アクセス解析・Cookieについて
-            </h2>
-            <p>
-              当ポータルおよび各エディションでは、インフラの安定運用・可用性向上・障害検知のため、Cloudflare Web Analytics 等の匿名解析ツールを利用する場合があります。これらは個人を特定するCookieを使用せず、プライバシーに配慮された集計データのみを取り扱います。
-            </p>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              5. 免責事項（釣行時の安全確保について）
-            </h2>
-            <p class="mb-3">
-              当サービスで表示されるタイドグラフ（潮汐予測）、潮名、気象情報、日の出・日の入り時刻等は参考用データです。気象および海況条件は急激に変化する可能性があり、実際の天候や海象と異なる場合があります。
-            </p>
-            <p class="mb-3">
-              釣行の際は必ず気象庁・海上保安庁・自治体等の最新の気象警報・注意報を確認し、ライフジャケットの常時着用、立入禁止・危険箇所の回避、天候悪化時の速やかな退避など、自身の安全確保を最優先として行動してください。
-            </p>
-            <p>
-              当サービスの利用または利用不能により生じた一切の損害、事故、トラブルについて、開発者および運営者はその責任を負いかねますのであらかじめご了承ください。
-            </p>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              6. Privacy Policy Summary (English)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Local-First Design:</strong> AnglerLog stores all your fishing spots, GPS coordinates, catch records, photos, and notes locally in your browser (IndexedDB / localStorage). No personal data or secret spots are uploaded to external servers.</p>
-              <p><strong class="text-white">GPS Location:</strong> Location access is used only to show your position, log waypoints, and fetch tide/weather forecasts for that coordinate.</p>
-              <p><strong class="text-white">Safety Disclaimer:</strong> Tide predictions and weather forecasts are for informational purposes only. Always prioritize maritime safety, check official weather advisories, wear personal flotation devices (life vests), and adhere to local fishing regulations. The developer assumes no liability for incidents or damages arising from the use of this app.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              7. Résumé de la politique de confidentialité (Français)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Conception 100% Locale :</strong> AnglerLog conserve l'intégralité de vos repères GPS, prises, photos et notes dans la mémoire locale de votre navigateur (IndexedDB / localStorage). Aucune donnée personnelle ni aucun spot secret n'est envoyé à des serveurs tiers.</p>
-              <p><strong class="text-white">Localisation GPS :</strong> L'accès aux coordonnées GPS sert uniquement à afficher votre position sur la carte et à charger les prévisions marines pour ce point.</p>
-              <p><strong class="text-white">Avertissement de Sécurité :</strong> Les prédictions de marée et données météo sont fournies à titre indicatif. Veillez toujours à votre sécurité en mer, portez un gilet de sauvetage et respectez la réglementation locale. Le développeur décline toute responsabilité en cas d'accident ou de dommage lié à l'utilisation de l'application.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              8. Zusammenfassung der Datenschutzerklärung (Deutsch)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Lokales Offline-Design:</strong> AnglerLog speichert sämtliche Fangplätze, GPS-Koordinaten, Fangberichte, Fotos und Notizen ausschließlich lokal in Ihrem Browser (IndexedDB / localStorage). Es werden keinerlei persönliche Daten oder geheime Spots auf externe Server hochgeladen.</p>
-              <p><strong class="text-white">GPS-Standortdaten:</strong> Die Freigabe des GPS-Standorts wird ausschließlich genutzt, um Ihre Position auf der Karte anzuzeigen und Gezeiten- sowie Wetterdaten für diesen Punkt abzurufen.</p>
-              <p><strong class="text-white">Sicherheitshinweis für die Seefahrt:</strong> Gezeitenvorhersagen und Wetterangaben dienen lediglich der unverbindlichen Orientierung. Sicherheit am Wasser geht immer vor: Tragen Sie Rettungswesten und beachten Sie offizielle Unwetterwarnungen. Der Entwickler übernimmt keine Haftung für Unfälle oder Schäden im Zusammenhang mit der Nutzung der App.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              9. Resumen de la política de privacidad (Español)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Diseño 100% Local:</strong> AnglerLog almacena todos tus puntos de pesca, coordenadas GPS, capturas, fotos y notas exclusivamente en la memoria local de tu navegador (IndexedDB / localStorage). No se sube ningún dato personal ni marca secreta a servidores externos.</p>
-              <p><strong class="text-white">Ubicación GPS:</strong> El acceso al GPS se utiliza únicamente para mostrar tu posición en el mapa y consultar las previsiones de mareas y clima para esa coordenada.</p>
-              <p><strong class="text-white">Aviso de Seguridad Marítima:</strong> Las previsiones de mareas y meteorología son de carácter informativo. Prioriza siempre la seguridad en el mar, revisa avisos oficiales, usa chaleco salvavidas y respeta la normativa de pesca. El desarrollador no asume responsabilidad por accidentes o daños derivados del uso de la app.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              10. Riepilogo dell'informativa sulla privacy (Italiano)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Architettura 100% Locale:</strong> AnglerLog memorizza tutti gli spot di pesca, coordinate GPS, catture, foto e appunti unicamente nella memoria locale del tuo browser (IndexedDB / localStorage). Nessun dato personale o spot segreto viene caricato su server esterni.</p>
-              <p><strong class="text-white">Posizione GPS:</strong> L'accesso alla posizione GPS serve unicamente per visualizzare la posizione sulla mappa e caricare le previsioni meteomarine per quelle coordinate.</p>
-              <p><strong class="text-white">Disclaimer di Sicurezza:</strong> Le previsioni di marea e meteo hanno scopo puramente indicativo. Dai sempre priorità alla sicurezza in mare, verifica le allerte meteo ufficiali, indossa il giubbotto di salvataggio e rispetta le normative locali. Lo sviluppatore declina ogni responsabilità per incidenti o danni derivanti dall'uso dell'app.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              11. Resumo da política de privacidade (Português)
-            </h2>
-            <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-2">
-              <p><strong class="text-white">Conceção 100% Local:</strong> O AnglerLog guarda todos os seus pesqueiros, coordenadas GPS, registos de capturas, fotografias e notas exclusivamente no navegador do seu dispositivo (IndexedDB / localStorage). Nenhum dado pessoal ou pesqueiro secreto é enviado para servidores externos.</p>
-              <p><strong class="text-white">Localização GPS:</strong> O acesso ao GPS é utilizado unicamente para mostrar a sua posição no mapa e obter previsões marítimas para essas coordenadas.</p>
-              <p><strong class="text-white">Aviso de Segurança Marítima:</strong> As previsões de marés e meteorologia são meramente informativas. Priorize sempre a segurança no mar, consulte os avisos oficiais, use colete salva-vidas e cumpra a legislação de pesca. O programador não assume responsabilidade por acidentes ou danos decorrentes da utilização da aplicação.</p>
-            </div>
-          </section>
-
-          <section>
-            <h2 class="font-black text-white text-lg mb-3 flex items-center gap-2.5">
-              <span class="w-2 h-5 bg-brand-400 rounded-full"></span>
-              12. お問い合わせ窓口
-            </h2>
-            <p>本サービスに関するご質問、フィードバック、お問い合わせは以下までお願いいたします。</p>
-            <p class="mt-2 font-mono text-brand-300 font-semibold">Email: stoooone.studio@gmail.com</p>
-          </section>
+          ${sectionsHtml}
 
           <div class="pt-8 border-t border-slate-800 text-xs text-slate-500 font-mono space-y-1">
-            <div>制定日: 2026年10月17日</div>
-            <div>改定日: 2026年10月24日 (グローバル7言語展開対応)</div>
+            <div>${p.dates.created}</div>
+            <div>${p.dates.revised}</div>
           </div>
-
         </div>
 
       </div>
     </div>
   </main>`;
+}
+
 
 function htmlResponse(html) {
   return new Response(html, {
@@ -3246,7 +3581,99 @@ async function handleRequest(request, url) {
   </url>
   <url>
     <loc>https://angler-log.app/privacy</loc>
-    <lastmod>2026-10-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/en/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/fr/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/de/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/es/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/it/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://angler-log.app/pt/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://angler-log.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://angler-log.app/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://angler-log.app/fr/privacy" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://angler-log.app/de/privacy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://angler-log.app/es/privacy" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://angler-log.app/it/privacy" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://angler-log.app/pt/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://angler-log.app/privacy" />
+    <lastmod>2026-10-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3351,18 +3778,32 @@ async function handleRequest(request, url) {
     }
   }
 
-  if (url.pathname === "/privacy" || url.pathname === "/privacy/" || url.pathname === "/privacy-policy" || url.pathname === "/privacy.html") {
-    const html = htmlLayout({
-      title: "プライバシーポリシー・免責事項 - AnglerLog",
-      desc: "AnglerLog（自分専用の釣り場・釣果ノート）のプライバシーポリシーおよび釣行に関する免責事項。",
-      ogTitle: "プライバシーポリシー - AnglerLog",
-      ogDesc: "AnglerLogのプライバシーポリシーおよび免責事項",
-      ogUrl: "https://angler-log.app/privacy",
-      lang: "ja",
-      isPrivacy: true,
-      content: PRIVACY_MAIN
-    });
-    return htmlResponse(html);
+  const privacyRoutes = [
+    { path: "/privacy", lang: "ja", aliases: ["/privacy/", "/privacy-policy", "/privacy.html", "/privacy/ja", "/ja/privacy"] },
+    { path: "/en/privacy", lang: "en", aliases: ["/en/privacy/", "/privacy/en", "/en/privacy-policy", "/en/privacy.html"] },
+    { path: "/fr/privacy", lang: "fr", aliases: ["/fr/privacy/", "/privacy/fr", "/fr/privacy-policy", "/fr/privacy.html"] },
+    { path: "/de/privacy", lang: "de", aliases: ["/de/privacy/", "/privacy/de", "/de/privacy-policy", "/de/privacy.html"] },
+    { path: "/es/privacy", lang: "es", aliases: ["/es/privacy/", "/privacy/es", "/es/privacy-policy", "/es/privacy.html"] },
+    { path: "/it/privacy", lang: "it", aliases: ["/it/privacy/", "/privacy/it", "/it/privacy-policy", "/it/privacy.html"] },
+    { path: "/pt/privacy", lang: "pt", aliases: ["/pt/privacy/", "/privacy/pt", "/pt/privacy-policy", "/pt/privacy.html"] }
+  ];
+
+  for (const pr of privacyRoutes) {
+    if (url.pathname === pr.path || pr.aliases.includes(url.pathname)) {
+      const pt = PRIVACY_TRANSLATIONS[pr.lang];
+      const canonPath = pr.lang === "ja" ? "/privacy" : `/${pr.lang}/privacy`;
+      const html = htmlLayout({
+        title: pt.metaTitle,
+        desc: pt.metaDesc,
+        ogTitle: pt.metaTitle,
+        ogDesc: pt.metaDesc,
+        ogUrl: "https://angler-log.app" + canonPath,
+        lang: pr.lang,
+        isPrivacy: true,
+        content: renderPrivacyContent(pr.lang)
+      });
+      return htmlResponse(html);
+    }
   }
 
   // Default: Japanese landing page with multilingual detection
@@ -3433,9 +3874,9 @@ export default {
       const url = new URL(request.url);
       const isGet = request.method === "GET";
       const isVideo = url.pathname.startsWith("/videos/");
-      const cache = caches.default;
+      const cache = typeof caches !== "undefined" ? caches.default : null;
 
-      if (isGet && !isVideo) {
+      if (isGet && !isVideo && cache) {
         const cachedRes = await cache.match(request);
         if (cachedRes) {
           return cachedRes;
@@ -3444,7 +3885,7 @@ export default {
 
       const response = await handleRequest(request, url);
 
-      if (isGet && !isVideo && response && response.status === 200 && ctx && ctx.waitUntil) {
+      if (isGet && !isVideo && response && response.status === 200 && cache && ctx && ctx.waitUntil) {
         ctx.waitUntil(cache.put(request, response.clone()));
       }
 
